@@ -9,37 +9,38 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Serialize RDF graphs as dot graph diagrams',
-  'AUTHOR' => 'Jakob Voß <voss@gbv.de>',
-  'BUILD_REQUIRES' => {
-    'English' => '0',
-    'Test::More' => '0',
-    'utf8' => '0'
+  "ABSTRACT" => "Serialize RDF graphs as dot graph diagrams",
+  "AUTHOR" => "Jakob Vo\303\237 <voss\@gbv.de>",
+  "BUILD_REQUIRES" => {
+    "English" => 0,
+    "RDF::TriN3" => 0,
+    "RDF::Trine::Model" => 0,
+    "Test::More" => 0,
+    "utf8" => 0
   },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'RDF-Trine-Exporter-GraphViz',
-  'EXE_FILES' => [
-    'bin/rdfdot',
-    'bin/rdfdot'
+  "DISTNAME" => "RDF-Trine-Exporter-GraphViz",
+  "EXE_FILES" => [
+    "bin/rdfdot",
+    "bin/rdfdot"
   ],
-  'LICENSE' => 'perl',
-  'NAME' => 'RDF::Trine::Exporter::GraphViz',
-  'PREREQ_PM' => {
-    'Carp' => '0',
-    'Getopt::Long' => '0',
-    'GraphViz' => '0',
-    'Pod::Usage' => '0',
-    'RDF::Trine' => '0',
-    'RDF::Trine::Model' => '0',
-    'RDF::Trine::Parser' => '0',
-    'RDF::Trine::Serializer' => '0',
-    'Scalar::Util' => '0'
+  "LICENSE" => "perl",
+  "NAME" => "RDF::Trine::Exporter::GraphViz",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "GraphViz" => 0,
+    "RDF::Trine" => 0,
+    "RDF::Trine::Serializer" => 0,
+    "Scalar::Util" => 0,
+    "base" => 0,
+    "strict" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '0.003',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.12",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
