@@ -2,7 +2,7 @@
 use warnings;
 package RDF::Trine::Exporter::GraphViz;
 {
-  $RDF::Trine::Exporter::GraphViz::VERSION = '0.12';
+  $RDF::Trine::Exporter::GraphViz::VERSION = '0.13';
 }
 #ABSTRACT: Serialize RDF graphs as dot graph diagrams
 
@@ -152,7 +152,7 @@ sub iterator_as_graphviz {
         my $label = $options{alias}->{ $resource->uri };
         if (!defined $label) {
             my ($local, $qname) = eval { $resource->qname };
-            my $prefix = $nsprefix{$local} if $local;
+            my $prefix = $local ? $nsprefix{$local} : "";
             $label = $prefix ? "$prefix:$qname" : $resource->as_string;
         }
     };
@@ -210,7 +210,7 @@ RDF::Trine::Exporter::GraphViz - Serialize RDF graphs as dot graph diagrams
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -378,7 +378,7 @@ Jakob Voß <voss@gbv.de>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Jakob Voß.
+This software is copyright (c) 2012 by Jakob Voß.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

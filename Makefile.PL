@@ -14,7 +14,6 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "English" => 0,
     "RDF::TriN3" => 0,
-    "RDF::Trine::Model" => 0,
     "Test::More" => 0,
     "utf8" => 0
   },
@@ -30,15 +29,20 @@ my %WriteMakefileArgs = (
   "NAME" => "RDF::Trine::Exporter::GraphViz",
   "PREREQ_PM" => {
     "Carp" => 0,
+    "Getopt::Long" => 0,
     "GraphViz" => 0,
+    "Pod::Usage" => 0,
+    "RDF::NS" => 0,
     "RDF::Trine" => 0,
+    "RDF::Trine::Model" => 0,
+    "RDF::Trine::Parser" => 0,
     "RDF::Trine::Serializer" => 0,
     "Scalar::Util" => 0,
     "base" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.12",
+  "VERSION" => "0.13",
   "test" => {
     "TESTS" => "t/*.t"
   }

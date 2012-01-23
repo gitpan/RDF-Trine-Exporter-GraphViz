@@ -15,4 +15,6 @@ t/release-no-tabs.t
 t/release-pod-coverage.t
 t/release-pod-syntax.t
 t/serialize.t
+test.dot
+test.png
 test.svg

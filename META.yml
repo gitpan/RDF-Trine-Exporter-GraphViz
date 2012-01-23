@@ -5,13 +5,12 @@ author:
 build_requires:
   English: 0
   RDF::TriN3: 0
-  RDF::Trine::Model: 0
   Test::More: 0
   utf8: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.110930'
+generated_by: 'Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -19,8 +18,13 @@ meta-spec:
 name: RDF-Trine-Exporter-GraphViz
 requires:
   Carp: 0
+  Getopt::Long: 0
   GraphViz: 0
+  Pod::Usage: 0
+  RDF::NS: 0
   RDF::Trine: 0
+  RDF::Trine::Model: 0
+  RDF::Trine::Parser: 0
   RDF::Trine::Serializer: 0
   Scalar::Util: 0
   base: 0
@@ -29,4 +33,4 @@ requires:
 resources:
   bugtracker: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz/issues
   repository: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz
-version: 0.12
+version: 0.13
