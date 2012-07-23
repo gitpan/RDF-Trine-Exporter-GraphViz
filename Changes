@@ -1,5 +1,9 @@
 # Change file for RDF::Trine::Exporter::GraphViz
 
+0.14 2012-07-21
+    New method to_string
+    New configuration parameters: edge and alias (extended)
+
 0.13 2012-01-23
     Moved list of namespace prefixes to RDF::NS
 

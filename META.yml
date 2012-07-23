@@ -3,14 +3,12 @@ abstract: 'Serialize RDF graphs as dot graph diagrams'
 author:
   - 'Jakob Voß <voss@gbv.de>'
 build_requires:
-  English: 0
-  RDF::TriN3: 0
   Test::More: 0
   utf8: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640'
+generated_by: 'Dist::Zilla version 4.300020, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -32,5 +30,6 @@ requires:
   warnings: 0
 resources:
   bugtracker: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz/issues
-  repository: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz
-version: 0.13
+  homepage: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz
+  repository: https://github.com/nichtich/RDF-Trine-Exporter-GraphViz.git
+version: 0.14

@@ -2,7 +2,7 @@
 use warnings;
 package RDF::Trine::Exporter::GraphViz;
 {
-  $RDF::Trine::Exporter::GraphViz::VERSION = '0.13';
+  $RDF::Trine::Exporter::GraphViz::VERSION = '0.14';
 }
 #ABSTRACT: Serialize RDF graphs as dot graph diagrams
 
@@ -10,6 +10,9 @@ use RDF::Trine;
 use GraphViz qw(2.04);
 use Scalar::Util qw(reftype blessed);
 use Carp;
+use RDF::NS;
+
+our $NS = RDF::NS->new('any');
 
 # TODO: create RDF::Trine::Exporter as base class
 use base qw(RDF::Trine::Serializer);
@@ -67,38 +70,10 @@ sub media_types {
     return ($self->{mime});
 }
 
-# The following two methods may better be moved to RDF::Trine::Exporter.
-sub serialize_model_to_string {
-    my $self  = shift;
-    my $model = shift;
-    return $self->serialize_iterator_to_string( $model->as_stream, @_ );
-}
+sub to_string {
+    my ($self, $rdf, %options) = @_;
 
-sub serialize_model_to_file {
-    my $self = shift;
-    my $file = shift;
-    if (defined $file and !ref $file) {
-        open (my $fh, '>', $file);
-        $file = $fh;
-    }
-    print {$file} $self->serialize_model_to_string( @_ );
-}
-
-sub to_file {
-    my $self = shift;
-    my $file = shift;
-    if (defined $file and !ref $file and
-        $file =~ /\.([^.]+)$/ and $FORMATS{$1} ) {
-        $self->serialize_model_to_file( $file, @_, as => $1 );
-    } else {
-        $self->serialize_model_to_file( $file, @_ );
-    }
-}
-
-sub serialize_iterator_to_string {
-    my ($self, $iter, %options) = @_;
-
-    my $g = $self->iterator_as_graphviz($iter, %options);
+    my $g = $self->as_graphviz($rdf, %options);
 
     my $format = ($options{as} || $self->{as});
     die "Unknown serialization format $format" unless $FORMATS{$format};
@@ -116,13 +91,36 @@ sub serialize_iterator_to_string {
     return $data;
 }
 
-# sub to_string
-# sub to_file (with guessing 'as' from filename)
+sub to_file {
+    my ($self, $file, $rdf, %options) = @_;
+
+    croak "missing file parameter" unless defined $file;
+
+    if (!ref $file) {
+        $options{as} = $1 if $file =~ /\.([^.]+)$/ and $FORMATS{$1};
+        open (my $fh, '>', $file);
+        $file = $fh;
+    }
+
+    print {$file} $self->to_string( $rdf, %options );
+}
+
+sub serialize_model_to_string {
+    shift->to_string(@_);
+}
+
+sub serialize_model_to_file {
+    shift->to_file(@_);
+}
+
+sub serialize_iterator_to_string {
+    shift->to_string(@_);
+}
 
 sub as_graphviz {
    my ($self, $rdf, %options) = @_;
    return unless blessed $rdf;
-   $rdf = $rdf->as_stream if $self->isa('RDF::Trine::Model');
+   $rdf = $rdf->as_stream if $rdf->isa('RDF::Trine::Model');
    return $self->iterator_as_graphviz( $rdf, %options );
 }
 
@@ -132,10 +130,15 @@ sub iterator_as_graphviz {
     # We could make use of named graphs in a later version...
     $options{title}      ||= $self->{title};
 
-    $options{namespaces} ||= $self->{namespaces} || { };
+    $options{namespaces} ||= $self->{namespaces} || $NS;
     $options{root}       ||= $self->{root};
     $options{prevar}     ||= $self->{prevar};
-    $options{alias}      ||= $self->{alias};
+
+    my $get_alias =    $options{alias} || $self->{alias} || { };
+    if (((reftype $get_alias) || '') eq 'HASH') {
+        my $hash = $get_alias;
+        $get_alias = sub { $hash->{shift} };
+    }
 
     # Basic options. Should be more configurable.
     my %gopt = %{$self->{style}};
@@ -144,22 +147,33 @@ sub iterator_as_graphviz {
     my %root_style = ( color => 'red' );
 
     $gopt{name} = $options{title} if defined $options{title};
+
+    my $get_edge = $options{edge};
+
     my $g = GraphViz->new( %gopt );
     my %nsprefix = reverse %{$options{namespaces}};
 
     my $get_label = sub {
         my $resource = shift;
-        my $label = $options{alias}->{ $resource->uri };
+        my $label = do { $_ = $resource->uri; $get_alias->( $_ ); };
         if (!defined $label) {
             my ($local, $qname) = eval { $resource->qname };
             my $prefix = $local ? $nsprefix{$local} : "";
             $label = $prefix ? "$prefix:$qname" : $resource->as_string;
         }
+        return $label;
     };
 
     my %seen;
     while (my $t = $iter->next) {
         my @nodes;
+        my $edge_options = { };
+        if ($get_edge) {
+            $_ = $t->predicate->uri;
+            $edge_options = $get_edge->( $t->predicate );
+        }
+        next unless defined $edge_options;
+
         foreach my $pos (qw(subject object)) {
             my $n = $t->$pos();
             my $label;
@@ -172,6 +186,7 @@ sub iterator_as_graphviz {
             } elsif( $n->is_variable ) {
                 $label = $options{prevar}.$n->name;
             }
+            # TODO: what about nodes with equal label?
             push(@nodes, $label);
             next if ($seen{ $label }++);
             if ( $n->is_literal ) {
@@ -191,8 +206,8 @@ sub iterator_as_graphviz {
             }
         }
 
-        my $label = $get_label->( $t->predicate );
-        $g->add_edge( @nodes, label => $label );
+        $edge_options->{label} //= $get_label->( $t->predicate );
+        $g->add_edge( @nodes, %$edge_options );
     }
 
     return $g;
@@ -210,16 +225,16 @@ RDF::Trine::Exporter::GraphViz - Serialize RDF graphs as dot graph diagrams
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
   use RDF::Trine::Exporter::GraphViz;
 
   my $ser = RDF::Trine::Exporter::GraphViz->new( as => 'dot' );
-  my $dot = $ser->serialize_model_to_string( $model );
+  my $dot = $ser->to_string( $rdf );
 
-  $ser->to_file( 'graph.svg', $model );
+  $ser->to_file( 'graph.svg', $rdf );
 
   # highly configurable
   my $g = RDF::Trine::Exporter::GraphViz->new(
@@ -256,30 +271,36 @@ are of interest in particular:
 Creates a new serializer with L<configuration|/CONFIGURATION> options
 as described below.
 
-=head2 media_types
-
-Returns the exporter's mime type. For instance if you create an exporter with
-C<< as => 'svg' >>, this method returns C<< ('image/svg+xml') >>.
-
-=head2 as_graphviz ( $rdf [, %options ] )
-
-Creates and returns a L<GraphViz> object for further processing. You must
-provide RDF data as L<RDF::Trine::Iterator> or as L<RDF::Trine::Model>.
-
 =head2 to_file ( $file, $rdf [, %options ] )
 
 Serialize RDF data, provided as L<RDF::Trine::Iterator> or as
 L<RDF::Trine::Model> to a file. C<$file> can be a filehandle or file name.
 The serialization format is automatically derived from known file extensions.
 
+=head2 to_string( $rdf [ %options ] )
+
+Serialize RDF data, provided as L<RDF::Trine::Iterator> or as
+L<RDF::Trine::Model> to a string.
+
+=head2 as_graphviz ( $rdf [, %options ] )
+
+Creates and returns a L<GraphViz> object for further processing. You must
+provide RDF data as L<RDF::Trine::Iterator> or as L<RDF::Trine::Model>.
+
+=head2 media_types
+
+Returns the exporter's mime type. For instance if you create an exporter with
+C<< as => 'svg' >>, this method returns C<< ('image/svg+xml') >>.
+
 =head2 serialize_model_to_file ( $file, $model [, %options ] )
 
-Serialize a L<RDF::Trine::Model> as graph diagram to a file,
-where C<$file> can be a filename or a filehandle.
+Provided as alias for C<to_file> for compatibility with other
+C<RDF::Trine::Exporter> classes.
 
 =head2 serialize_model_to_string ( $model [, %options ] )
 
-Serialize a L<RDF::Trine::Model> as graph diagram to a string.
+Provided as alias for C<to_string> for compatibility with other
+C<RDF::Trine::Exporter> classes.
 
 =head2 serialize_iterator_to_string ( $iterator [, %options ] )
 
@@ -287,7 +308,8 @@ Serialize a L<RDF::Trine::Iterator> as graph diagram to a string.
 
 =head2 iterator_as_graphviz ( $iterator )
 
-This internal the core method, used by all C<serialize_...> methods.
+Internal core method, used by C<to_string> and C<to_file>, which one should
+better call instead.
 
 =head1 CONFIGURATION
 
@@ -335,6 +357,12 @@ C<< { shape => 'box' } >>.
 Hash reference with options to style blank nodes. Defaults to C<< { label => '',
 shape => 'point', fillcolor => 'white', color => 'gray', width => '0.3' } >>.
 
+=item edge
+
+Code referece with a function that get passed a predicate and variable C<$_>
+set to the predicate's URI. The function must return undef to skip the RDF
+statement or a hash reference with options to style the edge.
+
 =item url
 
 Add clickable URLs to nodes You can either provide a boolean value or a code
@@ -362,6 +390,11 @@ An URI that is marked as 'root' node.
 =item title
 
 Add a title to the graph.
+
+=item namespaces
+
+Hash reference with mapping from prefixes to URI namespaces to abbreviate URIs.
+By default the prefix mapping from L<RDF::NS> is used.
 
 =back
 

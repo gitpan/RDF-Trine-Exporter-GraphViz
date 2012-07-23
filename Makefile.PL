@@ -12,8 +12,6 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "Serialize RDF graphs as dot graph diagrams",
   "AUTHOR" => "Jakob Vo\303\237 <voss\@gbv.de>",
   "BUILD_REQUIRES" => {
-    "English" => 0,
-    "RDF::TriN3" => 0,
     "Test::More" => 0,
     "utf8" => 0
   },
@@ -42,7 +40,7 @@ my %WriteMakefileArgs = (
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.13",
+  "VERSION" => "0.14",
   "test" => {
     "TESTS" => "t/*.t"
   }
