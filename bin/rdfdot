@@ -75,7 +75,7 @@ rdfdot - Create dot graph diagrams from RDF data.
 
 =head1 VERSION
 
-version 0.14
+version 0.141
 
 =head1 SYNOPSIS
 

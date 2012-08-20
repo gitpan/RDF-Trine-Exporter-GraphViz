@@ -2,7 +2,7 @@
 use warnings;
 package RDF::Trine::Exporter::GraphViz;
 {
-  $RDF::Trine::Exporter::GraphViz::VERSION = '0.14';
+  $RDF::Trine::Exporter::GraphViz::VERSION = '0.141';
 }
 #ABSTRACT: Serialize RDF graphs as dot graph diagrams
 
@@ -47,7 +47,7 @@ sub new {
 
     $self->{mime} ||= $FORMATS{ $self->{as} };
 
-    $self->{style}    ||= { rankdir => 1, concentrate => 1 };
+    $self->{style}    ||= { rankdir => 'BT', concentrate => 1 };
     $self->{node}     ||= { shape => 'plaintext', color => 'gray' };
     $self->{resource} ||= { shape => 'box', style => 'rounded',
         fontcolor => 'blue' };
@@ -148,7 +148,7 @@ sub iterator_as_graphviz {
 
     $gopt{name} = $options{title} if defined $options{title};
 
-    my $get_edge = $options{edge};
+    my $get_edge = $options{edge} || $self->{edge};
 
     my $g = GraphViz->new( %gopt );
     my %nsprefix = reverse %{$options{namespaces}};
@@ -225,7 +225,7 @@ RDF::Trine::Exporter::GraphViz - Serialize RDF graphs as dot graph diagrams
 
 =head1 VERSION
 
-version 0.14
+version 0.141
 
 =head1 SYNOPSIS
 
@@ -335,7 +335,7 @@ Mime type. By default automatically set based on C<as>.
 =item style
 
 General graph style options as hash reference. Defaults to
-C<< { rankdir => 1, concentrate => 1 } >>.
+C<< { rankdir => 'TB', concentrate => 1 } >>.
 
 =item node
 
